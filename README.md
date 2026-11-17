@@ -37,6 +37,15 @@ Authenticate, send messages, handle streaming, and build production-ready reques
 - Build circuit breakers
 - Log and monitor API usage
 
+### Bonus lesson: Claude Code Slash Commands
+
+**Learning Objectives:**
+- Tell built-in commands, skills, and workflows apart
+- Use core commands to steer a session, manage context, and check Claude's work
+- Write a custom command with arguments and live shell output
+
+Open [`modules/bonus-claude-code-slash-commands.html`](modules/bonus-claude-code-slash-commands.html) in a browser. It includes a searchable command reference, a hands-on exercise, and review questions.
+
 ---
 
 ## Enrollment

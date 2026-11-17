@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Claude Code Slash Commands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: Nexetra courseware shell. Paper ground, stacked rounded lesson panels within size-page, dark code.
+   Light = Nexetra "paper" (Courseware) theme; dark = Nexetra "dark" (Docs) theme. */
+:root {
+  --bg: #f5f1e8; --bg-soft: #ece4d7; --surface: #fffcf6; --surface-2: #fbf8f1;
+  --border: #dcd9d2; --border-strong: #c9c4bb;
+  --ink: #161616; --text: #161616; --text-secondary: #3d3d3d; --muted: #5b5b5b; --faint: #8a857c;
+  --brand: #0f766e; --primary: #0f766e; --primary-hover: #1d4ed8; --on-primary: #ffffff;
+  --primary-soft: #e3eeea; --on-primary-soft: #0f766e; --link: #0f766e;
+  --accent-warm: #9a3412; --focus-ring: #0f766e;
+  --notice-bg: #f7ecd2; --notice-border: #e6cf94; --notice-text: #6b4410;
+  --info-bg: #e6ecef; --info-border: #bccbd2; --info-rule: #1e6070; --info-text: #17212b;
+  --error-text: #7d2926;
+  --code-bg: #111827; --code-text: #e5e7eb; --code-key: #7ef0c4; --code-string: #ffd090; --code-comment: #8a9aa6;
+  --wash-a: rgba(15, 118, 110, 0.10); --wash-b: rgba(154, 52, 18, 0.07);
+  --shadow-panel: 0 24px 80px rgba(24, 24, 24, 0.08);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk", "Segoe UI", sans-serif;
+  --font-mono: "Cascadia Code", "Fira Code", Consolas, ui-monospace, monospace;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 1.2rem; --radius-pill: 999px;
+  --size-page: 1180px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1018; --bg-soft: #0c1520; --surface: #0f1923; --surface-2: #131f2e;
+    --border: #1e3048; --border-strong: #2a4a70;
+    --ink: #ffffff; --text: #d1e8f5; --text-secondary: #a0bccf; --muted: #8aa7c0; --faint: #6b8ca8;
+    --brand: #818cf8; --primary: #7ef0c4; --primary-hover: #55d7ff; --on-primary: #0a1a1f;
+    --primary-soft: #0d3b28; --on-primary-soft: #7ef0c4; --link: #55d7ff;
+    --accent-warm: #f4b860; --focus-ring: #7ef0c4;
+    --notice-bg: #2a2410; --notice-border: #5a4a14; --notice-text: #ffd090;
+    --info-bg: #0d2236; --info-border: #1a3d5c; --info-rule: #55d7ff; --info-text: #a0c8e0;
+    --error-text: #ff9055;
+    --code-bg: #080e14; --code-text: #b8d8f0;
+    --wash-a: rgba(126, 240, 196, 0.06); --wash-b: rgba(85, 215, 255, 0.05);
+    --shadow-panel: none;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1018; --bg-soft: #0c1520; --surface: #0f1923; --surface-2: #131f2e;
+  --border: #1e3048; --border-strong: #2a4a70;
+  --ink: #ffffff; --text: #d1e8f5; --text-secondary: #a0bccf; --muted: #8aa7c0; --faint: #6b8ca8;
+  --brand: #818cf8; --primary: #7ef0c4; --primary-hover: #55d7ff; --on-primary: #0a1a1f;
+  --primary-soft: #0d3b28; --on-primary-soft: #7ef0c4; --link: #55d7ff;
+  --accent-warm: #f4b860; --focus-ring: #7ef0c4;
+  --notice-bg: #2a2410; --notice-border: #5a4a14; --notice-text: #ffd090;
+  --info-bg: #0d2236; --info-border: #1a3d5c; --info-rule: #55d7ff; --info-text: #a0c8e0;
+  --error-text: #ff9055;
+  --code-bg: #080e14; --code-text: #b8d8f0;
+  --wash-a: rgba(126, 240, 196, 0.06); --wash-b: rgba(85, 215, 255, 0.05);
+  --shadow-panel: none;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background:
+    radial-gradient(900px 500px at 8% -5%, var(--wash-a), transparent 70%),
+    radial-gradient(700px 420px at 100% 10%, var(--wash-b), transparent 70%),
+    var(--bg);
+  background-color: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 var(--font-sans);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+.wrap { max-width: var(--size-page); margin: 0 auto; }
+.col { max-width: 720px; }
+h1, h2, h3 { font-family: var(--font-display); color: var(--ink); line-height: 1.2; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: 1.55rem; font-weight: 700; }
+h3 { font-size: 1.08rem; font-weight: 500; }
+p { margin: 0; }
+a { color: var(--link); }
+a:hover { color: var(--primary-hover); }
+a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+code, kbd, pre { font-family: var(--font-mono); font-size: 0.88em; }
+:not(pre) > code { background: var(--bg-soft); color: var(--ink); padding: 0.1em 0.35em; border-radius: 4px; }
+.eyebrow { font: 600 0.72rem/1 var(--font-sans); letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
+
+.topbar { position: relative; margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding-inline: max(16px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(8px); }
+.bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; min-height: 62px; padding-block: 10px; }
+.wordmark { font: 800 1.2rem/1 var(--font-sans); letter-spacing: -0.5px; color: var(--ink); }
+.wordmark span { color: var(--brand); }
+.crumb { font-size: 0.88rem; color: var(--muted); }
+.crumb a { color: var(--muted); }
+.bar .back { margin-left: auto; font-size: 0.88rem; font-weight: 600; }
+
+header.hero { padding-block: 48px 28px; display: grid; gap: 18px; }
+.hero .lede { font-size: 1.12rem; color: var(--text-secondary); max-width: 660px; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.9rem; color: var(--muted); }
+.prompt {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-family: var(--font-mono); background: var(--code-bg); color: var(--code-text);
+  border-radius: var(--radius-md); padding: 14px 16px; max-width: 660px;
+}
+.prompt .caret { color: var(--code-key); font-weight: 600; }
+.prompt .hint { color: var(--code-comment); font-size: 0.85em; margin-left: auto; }
+.jump { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 0.95rem; }
+
+main { display: grid; gap: 22px; }
+section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-panel); padding: clamp(20px, 3.5vw, 32px); display: grid; gap: 20px; min-width: 0; }
+.sec-head { display: grid; gap: 8px; }
+.sec-head p { color: var(--muted); max-width: 680px; }
+
+.objectives { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+
+.kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.kind { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.kind p { color: var(--muted); font-size: 0.95rem; }
+
+.tag { display: inline-block; font: 700 0.64rem/1 var(--font-sans); letter-spacing: 0.07em; text-transform: uppercase; padding: 5px 8px; border-radius: var(--radius-pill); white-space: nowrap; border: 1px solid transparent; }
+.tag.builtin { background: var(--primary-soft); color: var(--on-primary-soft); }
+.tag.skill { background: var(--notice-bg); color: var(--notice-text); border-color: var(--notice-border); }
+.tag.workflow { background: var(--info-bg); color: var(--info-text); border-color: var(--info-border); }
+
+.starter { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px 28px; }
+.starter-group { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.starter-group h3 { font: 600 0.92rem var(--font-sans); color: var(--muted); }
+.starter-row { display: grid; grid-template-columns: 9.5rem 1fr; gap: 12px; padding-block: 6px; border-bottom: 1px dashed var(--border); font-size: 0.95rem; }
+.starter-row code { background: none !important; padding: 0 !important; color: var(--primary) !important; font-weight: 600; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; position: sticky; top: env(safe-area-inset-top, 0px); background: var(--surface); padding-block: 12px; z-index: 5; border-bottom: 1px solid var(--border); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+#q { flex: 1 1 260px; min-width: 0; font: 15px var(--font-mono); padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 0.5rem; background: var(--surface-2); color: var(--text); transition: border-color .17s ease; }
+#q:focus { border-color: var(--focus-ring); outline: none; box-shadow: 0 0 0 3px var(--primary-soft); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 600 0.82rem var(--font-sans); padding: 6px 12px; border-radius: var(--radius-pill); border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text); cursor: pointer; transition: background .14s ease; }
+.chip:hover { border-color: var(--primary); }
+.chip[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+.count { font: 0.85rem var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.ref { display: grid; gap: 28px; }
+.ref-cat { display: grid; gap: 2px; }
+.ref-cat > h3 { padding-bottom: 6px; border-bottom: 2px solid var(--primary); display: flex; gap: 10px; align-items: baseline; }
+.ref-cat > h3 span { font: 0.8rem var(--font-mono); color: var(--faint); }
+.row { display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr) auto; gap: 6px 16px; padding-block: 10px; border-bottom: 1px solid var(--border); align-items: baseline; }
+.row .cmd { font-family: var(--font-mono); font-size: 0.9rem; min-width: 0; overflow-wrap: anywhere; }
+.row .cmd b { color: var(--primary); }
+.row .cmd .args { color: var(--muted); }
+.row .desc { font-size: 0.95rem; min-width: 0; }
+.row .alias { display: block; font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+.empty { color: var(--muted); padding: 24px 0; }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; align-items: start; }
+.two > * { min-width: 0; }
+pre { background: var(--code-bg); color: var(--code-text); border-radius: var(--radius-md); padding: 16px; overflow-x: auto; margin: 0; line-height: 1.55; }
+pre .c { color: var(--code-comment); }
+pre .k { color: var(--code-key); }
+pre .s { color: var(--code-string); }
+.filecap { font: 0.8rem var(--font-mono); color: var(--muted); margin-bottom: 6px; overflow-wrap: anywhere; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font: 700 0.7rem var(--font-sans); text-transform: uppercase; letter-spacing: 0.08em; color: var(--faint); }
+tr:last-child td { border-bottom: 0; }
+td code { white-space: nowrap; }
+ul.plain { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.note { font-size: 0.92rem; color: var(--muted); }
+.changes td:first-child { white-space: nowrap; }
+.struck { text-decoration: line-through; color: var(--error-text) !important; }
+.src { display: grid; gap: 6px; font-size: 0.93rem; }
+
+.steps { margin: 0; padding-left: 1.4em; display: grid; gap: 14px; }
+.steps li { padding-left: 4px; min-width: 0; }
+section > *, .quiz > * { min-width: 0; }
+.steps li > p + pre, .steps li > p + .filecap { margin-top: 8px; }
+.callout { background: var(--info-bg); border: 1px solid var(--info-border); border-left: 4px solid var(--info-rule); color: var(--info-text); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 0.94rem; }
+.callout strong { color: var(--ink); }
+.quiz { display: grid; gap: 10px; }
+.quiz details { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 16px; }
+.quiz summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+.quiz details[open] summary { margin-bottom: 8px; }
+.quiz details p { color: var(--text-secondary); }
+
+footer.foot { padding-block: 28px 0; display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; font-size: 0.88rem; color: var(--muted); }
+
+@media (max-width: 640px) {
+  .row { grid-template-columns: minmax(0, 1fr) auto; }
+  .row .desc { grid-column: 1 / -1; }
+  .starter-row { grid-template-columns: 1fr; gap: 2px; }
+  .prompt .hint { margin-left: 0; width: 100%; }
+  .bar .back { margin-left: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .prompt .typed::after { content: "▍"; color: var(--code-key); animation: blink 1.1s steps(1) infinite; margin-left: 2px; }
+  @keyframes blink { 50% { opacity: 0; } }
+}
+</style>
+
+</head>
+<body>
+<div class="topbar">
+  <div class="wrap bar">
+    <span class="wordmark">Nexe<span>tra</span></span>
+    <span class="crumb"><a href="https://github.com/derricksobrien/anthropic-01-claude-api" target="_blank" rel="noopener">Foundations of Claude API Integration</a> · Bonus lesson</span>
+    <a class="back" href="https://github.com/derricksobrien/anthropic-01-claude-api" target="_blank" rel="noopener">Back to course</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="hero">
+    <span class="eyebrow">Bonus lesson · Claude Code</span>
+    <h1>Claude Code Slash Commands</h1>
+    <p class="lede">Type <code>/</code> at the start of the prompt to run a command. Some commands are built into the tool, some are skills that ship with it, and you can write your own. This lesson covers all three, then you'll build a command of your own.</p>
+    <div class="meta"><span>45 minutes</span><span>·</span><span>Hands-on exercise</span><span>·</span><span>Needs Claude Code installed and a git repository</span></div>
+    <div class="prompt" aria-label="Example prompt">
+      <span class="caret">&gt;</span><span class="typed">/code-review high --fix</span>
+      <span class="hint">Tab completes · ↑↓ picks from the menu</span>
+    </div>
+    <nav class="jump" aria-label="Sections">
+      <a href="#objectives">Objectives</a>
+      <a href="#kinds">Three kinds</a>
+      <a href="#start">Start with these</a>
+      <a href="#reference">Full reference</a>
+      <a href="#custom">Write your own</a>
+      <a href="#plugins">Plugins and MCP</a>
+      <a href="#exercise">Exercise</a>
+      <a href="#check">Check your understanding</a>
+      <a href="#changes">Recent changes</a>
+      <a href="#learn">Sources</a>
+    </nav>
+  </header>
+
+  <main>
+  <section id="objectives">
+    <div class="sec-head">
+      <span class="eyebrow">Learning objectives</span>
+      <h2>By the end of this lesson you will be able to</h2>
+    </div>
+    <ul class="objectives col">
+      <li>Tell built-in commands, skills, and workflows apart, and say who can run each</li>
+      <li>Use the core commands to steer a session, manage context, and check Claude's work</li>
+      <li>Write a custom command with arguments and live shell output</li>
+      <li>Decide whether a command belongs to the project, to you, or in a plugin</li>
+    </ul>
+  </section>
+
+  <section id="kinds">
+    <div class="sec-head">
+      <span class="eyebrow">The basics</span>
+      <h2>Three kinds of slash command</h2>
+      <p>They look the same in the menu. The difference is who wrote them and whether Claude can run them on its own.</p>
+    </div>
+    <div class="kinds">
+      <div class="kind">
+        <span><span class="tag builtin">Built-in</span></span>
+        <h3>Part of the tool</h3>
+        <p>Control the session itself: clear or compact context, switch model, manage permissions, resume an old conversation. They run instantly and don't call the model.</p>
+      </div>
+      <div class="kind">
+        <span><span class="tag skill">Skill</span></span>
+        <h3>Bundled or custom skills</h3>
+        <p>A prompt with instructions that Claude follows, such as <code>/code-review</code> or <code>/loop</code>. Your own commands are skills too. By default Claude can also load them itself when a task matches.</p>
+      </div>
+      <div class="kind">
+        <span><span class="tag workflow">Workflow</span></span>
+        <h3>Multi-step jobs</h3>
+        <p>Longer jobs that spread work across subagents, such as <code>/deep-research</code>. Track progress with <code>/workflows</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="start">
+    <div class="sec-head">
+      <span class="eyebrow">If you learn only twenty</span>
+      <h2>Start with these</h2>
+      <p>Grouped by the job you're trying to do.</p>
+    </div>
+    <div class="starter">
+      <div class="starter-group">
+        <h3>Start and steer a session</h3>
+        <div class="starter-row"><code>/init</code><span>Write a starter CLAUDE.md for the project</span></div>
+        <div class="starter-row"><code>/plan</code><span>Plan first, change nothing until you approve</span></div>
+        <div class="starter-row"><code>/model</code><span>Switch model</span></div>
+        <div class="starter-row"><code>/effort</code><span>Trade speed for depth (low to max)</span></div>
+        <div class="starter-row"><code>/resume</code><span>Pick up an earlier conversation</span></div>
+      </div>
+      <div class="starter-group">
+        <h3>Manage context</h3>
+        <div class="starter-row"><code>/context</code><span>See what's filling the context window</span></div>
+        <div class="starter-row"><code>/compact</code><span>Summarize history to free space</span></div>
+        <div class="starter-row"><code>/clear</code><span>Start fresh on a new task</span></div>
+        <div class="starter-row"><code>/memory</code><span>Edit CLAUDE.md and auto memory</span></div>
+        <div class="starter-row"><code>/rewind</code><span>Undo back to an earlier point, code included</span></div>
+      </div>
+      <div class="starter-group">
+        <h3>Check the work</h3>
+        <div class="starter-row"><code>/diff</code><span>Review working tree changes</span></div>
+        <div class="starter-row"><code>/code-review</code><span>Find correctness bugs in the diff</span></div>
+        <div class="starter-row"><code>/simplify</code><span>Clean up changed code (not bug-hunting)</span></div>
+        <div class="starter-row"><code>/security-review</code><span>Look for security issues on the branch</span></div>
+        <div class="starter-row"><code>/verify</code><span>Build and run the app to confirm a change</span></div>
+      </div>
+      <div class="starter-group">
+        <h3>Set up and get help</h3>
+        <div class="starter-row"><code>/help</code><span>List commands</span></div>
+        <div class="starter-row"><code>/powerup</code><span>Interactive lessons inside the terminal</span></div>
+        <div class="starter-row"><code>/permissions</code><span>Allow, ask, and deny rules for tools</span></div>
+        <div class="starter-row"><code>/doctor</code><span>Check your setup and fix problems</span></div>
+        <div class="starter-row"><code>/usage</code><span>Cost, plan limits, and activity</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reference">
+    <div class="sec-head">
+      <span class="eyebrow">Reference</span>
+      <h2>Every command</h2>
+      <p>Search by name or by what you want to do. Arguments in <code>[brackets]</code> are optional and <code>&lt;angle brackets&gt;</code> are required. Not every command appears for every user: some depend on your plan, platform, or settings.</p>
+    </div>
+    <div class="controls">
+      <input id="q" type="search" placeholder="Search, e.g. review, undo, model" aria-label="Search commands" autocomplete="off">
+      <span class="count" id="count" aria-live="polite"></span>
+      <div class="chips" id="chips" role="group" aria-label="Filter by kind">
+        <button class="chip" type="button" data-kind="all" aria-pressed="true">All</button>
+        <button class="chip" type="button" data-kind="builtin" aria-pressed="false">Built-in</button>
+        <button class="chip" type="button" data-kind="skill" aria-pressed="false">Skills</button>
+        <button class="chip" type="button" data-kind="workflow" aria-pressed="false">Workflows</button>
+      </div>
+    </div>
+    <div class="ref" id="ref"></div>
+  </section>
+
+  <section id="custom">
+    <div class="sec-head">
+      <span class="eyebrow">Write your own</span>
+      <h2>Custom commands are now skills</h2>
+      <p>A custom command is a Markdown file with optional settings at the top. The folder name becomes the command. Older files in <code>.claude/commands/</code> still work. For example, <code>.claude/commands/deploy.md</code> gives you <code>/deploy</code>.</p>
+    </div>
+
+    <div class="two">
+      <div>
+        <div class="filecap">~/.claude/skills/summarize-changes/SKILL.md → /summarize-changes</div>
+<pre><span class="c">---</span>
+<span class="k">description:</span> Summarizes uncommitted changes and flags
+  anything risky. Use when the user asks what changed,
+  wants a commit message, or asks to review their diff.
+<span class="c">---</span>
+## Current changes
+<span class="s">!`git diff HEAD`</span>
+
+## Instructions
+Summarize the changes above in two or three bullet
+points, then list any risks...</pre>
+        <p class="note" style="margin-top:8px">The <code>!`git diff HEAD`</code> line runs before Claude reads the file. Its output takes the line's place, so Claude sees the real diff.</p>
+      </div>
+      <div>
+        <div class="filecap">.claude/skills/fix-issue/SKILL.md → /fix-issue 142 high</div>
+<pre><span class="c">---</span>
+<span class="k">description:</span> Fix a GitHub issue by number
+<span class="k">argument-hint:</span> [issue-number] [priority]
+<span class="k">allowed-tools:</span> Bash(gh *) Bash(git *)
+<span class="k">disable-model-invocation:</span> true
+<span class="c">---</span>
+Fix issue #<span class="s">$0</span> (priority: <span class="s">$1</span>).
+
+Issue details:
+<span class="s">!`gh issue view $0`</span>
+
+Write a failing test first, then the fix.</pre>
+        <p class="note" style="margin-top:8px">An example built from the documented fields. <code>disable-model-invocation</code> means only you can run it, so Claude won't start it on its own.</p>
+      </div>
+    </div>
+
+    <h3>Where the file goes</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scope</th><th>Path</th><th>Who gets it</th></tr></thead>
+        <tbody>
+          <tr><td>Project</td><td><code>.claude/skills/&lt;name&gt;/SKILL.md</code></td><td>Everyone who clones the repo. Commit it to share.</td></tr>
+          <tr><td>Personal</td><td><code>~/.claude/skills/&lt;name&gt;/SKILL.md</code></td><td>You, in every project on that machine.</td></tr>
+          <tr><td>Nested</td><td><code>&lt;subdir&gt;/.claude/skills/&lt;name&gt;/SKILL.md</code></td><td>Loads when Claude first works in that folder. Useful in monorepos.</td></tr>
+          <tr><td>Plugin</td><td><code>&lt;plugin&gt;/skills/&lt;name&gt;/SKILL.md</code></td><td>Anyone who installs the plugin. Runs as <code>/plugin-name:skill-name</code>.</td></tr>
+          <tr><td>Enterprise</td><td>Managed settings directory</td><td>Everyone in the organization.</td></tr>
+          <tr><td>Legacy</td><td><code>.claude/commands/&lt;name&gt;.md</code></td><td>Still works. Subfolders namespace it: <code>commands/frontend/component.md</code> → <code>/frontend:component</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">If two have the same name, personal beats project, and a skill beats a <code>.claude/commands/</code> file. A custom skill named like a bundled one (for example <code>code-review</code>) replaces it. Edits are picked up live. Run <code>/reload-skills</code> after creating a new skills folder.</p>
+
+    <div class="two">
+      <div>
+        <h3 style="margin-bottom:10px">Settings at the top of the file</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Field</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td><code>description</code></td><td>What it does and when to use it. Claude reads this to decide when to load it. Recommended.</td></tr>
+              <tr><td><code>argument-hint</code></td><td>Hint shown in autocomplete, e.g. <code>[issue-number]</code></td></tr>
+              <tr><td><code>arguments</code></td><td>Named arguments, used as <code>$name</code></td></tr>
+              <tr><td><code>allowed-tools</code></td><td>Tools pre-approved while it runs</td></tr>
+              <tr><td><code>disable-model-invocation</code></td><td><code>true</code>: only you can run it</td></tr>
+              <tr><td><code>user-invocable</code></td><td><code>false</code>: hidden from the menu, so only Claude can use it</td></tr>
+              <tr><td><code>model</code> / <code>effort</code></td><td>Override the model or effort for that turn</td></tr>
+              <tr><td><code>context: fork</code></td><td>Run in a subagent. Pick one with <code>agent</code> (e.g. <code>Explore</code>)</td></tr>
+              <tr><td><code>name</code></td><td>Command name, if not the folder name</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:10px">Placeholders in the body</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Write</th><th>Becomes</th></tr></thead>
+            <tbody>
+              <tr><td><code>$ARGUMENTS</code></td><td>Everything typed after the command</td></tr>
+              <tr><td><code>$0</code>, <code>$1</code>…</td><td>Single arguments, counting from 0. Quote multi-word values: <code>/x "hello world" two</code></td></tr>
+              <tr><td><code>$name</code></td><td>A named argument from <code>arguments</code></td></tr>
+              <tr><td><code>!`command`</code></td><td>The command's output, run before Claude reads the file. A failing command stops the run. Add <code>|| true</code> to tolerate it.</td></tr>
+              <tr><td><code>${CLAUDE_SKILL_DIR}</code></td><td>The skill's own folder, for bundled scripts and files</td></tr>
+              <tr><td><code>${CLAUDE_PROJECT_DIR}</code></td><td>The project root</td></tr>
+              <tr><td><code>\$</code></td><td>A literal dollar sign</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note" style="margin-top:8px">If the body has no placeholder, what you typed is added at the end as <code>ARGUMENTS: …</code>. You can run several skills in one message, e.g. <code>/skill-a /skill-b do this</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="plugins">
+    <div class="sec-head">
+      <span class="eyebrow">From elsewhere</span>
+      <h2>Plugin and MCP commands</h2>
+    </div>
+    <ul class="plain col">
+      <li><strong>Plugins</strong> can add commands. They're always namespaced as <code>/plugin-name:command</code>, so they never clash with yours. Manage them with <code>/plugin</code>, and run <code>/reload-plugins</code> after changes.</li>
+      <li><strong>MCP servers</strong> can expose prompts that show up as commands. Manage servers with <code>/mcp</code>. Exact naming depends on the server. See the MCP page in the docs.</li>
+      <li><strong>Agent SDK:</strong> custom commands are also available when you build your own agents with the Claude Agent SDK. They're listed in the session's start message.</li>
+    </ul>
+  </section>
+
+  <section id="exercise">
+    <div class="sec-head">
+      <span class="eyebrow">Hands-on exercise · 20 minutes</span>
+      <h2>Build a <code>/commit-message</code> command</h2>
+      <p>You'll write a project command that reads your staged changes and drafts a commit message in your team's style. Use any git repository you can change. The course's lab machines work too.</p>
+    </div>
+    <ol class="steps col">
+      <li>
+        <p>From the repository root, create the skill folder.</p>
+<pre>mkdir -p .claude/skills/commit-message</pre>
+      </li>
+      <li>
+        <p>Create <code>.claude/skills/commit-message/SKILL.md</code> with this content.</p>
+<pre><span class="c">---</span>
+<span class="k">description:</span> Draft a commit message for the staged changes
+<span class="k">argument-hint:</span> [ticket-id]
+<span class="k">disable-model-invocation:</span> true
+<span class="c">---</span>
+## Staged changes
+<span class="s">!`git diff --cached --stat`</span>
+<span class="s">!`git diff --cached`</span>
+
+## Instructions
+Write a commit message for the changes above.
+- First line: under 60 characters, imperative mood
+- If a ticket ID was given, start the first line with it: <span class="s">$ARGUMENTS</span>
+- Then a blank line and 2-4 bullets explaining why
+Don't commit. Just show the message.</pre>
+      </li>
+      <li>
+        <p>Stage a small change, then start Claude Code in the repository and type <code>/</code>. Your command appears in the menu with its description.</p>
+<pre>git add -p
+claude</pre>
+      </li>
+      <li>
+        <p>Run it with and without an argument, and compare the results.</p>
+<pre>/commit-message
+/commit-message LAB-142</pre>
+      </li>
+      <li>
+        <p>Change one rule in the file (for example, ask for a one-line message only) and run it again. The edit applies straight away, with no restart.</p>
+      </li>
+    </ol>
+    <div class="callout col"><strong>Done when</strong> <code>/commit-message LAB-142</code> prints a message whose first line starts with <code>LAB-142</code> and describes your staged change. Commit the <code>.claude/skills/</code> folder and everyone who clones the repository gets the command.</div>
+  </section>
+
+  <section id="check">
+    <div class="sec-head">
+      <span class="eyebrow">Check your understanding</span>
+      <h2>Five questions</h2>
+      <p>Answer each one, then open it to check.</p>
+    </div>
+    <div class="quiz col">
+      <details>
+        <summary>1. You're halfway through a task and Claude is getting slower and losing track. Which command helps without losing the thread?</summary>
+        <p><code>/compact</code>. It summarizes the conversation so far and frees context. <code>/clear</code> would throw everything away, which is better when you're switching to an unrelated task. Use <code>/context</code> first to see what's taking up the space.</p>
+      </details>
+      <details>
+        <summary>2. What's the difference between <code>/code-review</code> and <code>/simplify</code>?</summary>
+        <p><code>/code-review</code> looks for correctness bugs. <code>/simplify</code> looks for cleanup: duplicated code, needless complexity, inefficiency. It doesn't hunt for bugs.</p>
+      </details>
+      <details>
+        <summary>3. You want a deploy command that Claude must never start on its own. Which setting do you add?</summary>
+        <p><code>disable-model-invocation: true</code>. Then only you can run it, by typing the command.</p>
+      </details>
+      <details>
+        <summary>4. Where do you save a command so that everyone on the project gets it?</summary>
+        <p>In the repository at <code>.claude/skills/&lt;name&gt;/SKILL.md</code>, and commit it. A file under <code>~/.claude/skills/</code> is personal: only you get it.</p>
+      </details>
+      <details>
+        <summary>5. In the exercise, when does <code>git diff --cached</code> run?</summary>
+        <p>Before Claude sees the prompt. The <code>!`...`</code> line is replaced by the command's output, so Claude reads your actual staged diff, not the command.</p>
+      </details>
+    </div>
+  </section>
+
+  <section id="changes">
+    <div class="sec-head">
+      <span class="eyebrow">Keep training current</span>
+      <h2>Recent changes</h2>
+      <p>Older courses and blog posts may still teach these.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="changes">
+        <thead><tr><th>Old</th><th>Now</th></tr></thead>
+        <tbody>
+          <tr><td><code>.claude/commands/*.md</code></td><td>Merged into skills (<code>.claude/skills/&lt;name&gt;/SKILL.md</code>). Old files still work.</td></tr>
+          <tr><td><code class="struck">/vim</code></td><td>Removed. Use the editor mode setting in <code>/config</code>.</td></tr>
+          <tr><td><code class="struck">/pr-comments</code></td><td>Removed. Ask Claude directly.</td></tr>
+          <tr><td><code class="struck">/ultraplan</code></td><td>Removed. Use plan mode (<code>/plan</code>).</td></tr>
+          <tr><td><code>/extra-usage</code></td><td>Renamed <code>/usage-credits</code></td></tr>
+          <tr><td><code>/routines</code></td><td>Renamed <code>/schedule</code> (the old name still works)</td></tr>
+          <tr><td><code>/review</code></td><td>Now an alias of <code>/code-review</code></td></tr>
+          <tr><td><code>/design</code>, <code>/design-sync</code></td><td>Use the standalone Claude Design site, which the docs say closes by December 14, 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="learn">
+    <div class="sec-head">
+      <span class="eyebrow">Go further</span>
+      <h2>Training and sources</h2>
+    </div>
+    <div class="two">
+      <div class="src">
+        <h3>Official</h3>
+        <a href="https://code.claude.com/docs/en/commands" target="_blank" rel="noopener">Commands reference (Claude Code docs)</a>
+        <a href="https://code.claude.com/docs/en/skills" target="_blank" rel="noopener">Extend Claude with skills (custom commands)</a>
+        <a href="https://code.claude.com/docs/en/agent-sdk/slash-commands" target="_blank" rel="noopener">Slash commands in the Agent SDK</a>
+        <a href="https://anthropic.skilljar.com/claude-code-in-action" target="_blank" rel="noopener">Claude Code in Action (Anthropic Academy, free course)</a>
+        <p class="note">In the terminal, <code>/powerup</code> runs interactive lessons on Claude Code features.</p>
+      </div>
+      <div class="src">
+        <h3>Third-party tutorials</h3>
+        <a href="https://www.datacamp.com/tutorial/claude-code-slash-commands" target="_blank" rel="noopener">DataCamp: Claude Code slash commands</a>
+        <a href="https://designcode.io/claude-code-slash-commands" target="_blank" rel="noopener">Design+Code: Slash Commands in Claude Code</a>
+        <a href="https://www.educative.io/courses/claude-code/custom-commands-and-skills" target="_blank" rel="noopener">Educative: Custom commands and skills</a>
+        <p class="note">Third-party material can lag behind. Check it against the official docs.</p>
+      </div>
+    </div>
+    <p class="note col">Summarized from the official Claude Code documentation as of November 17, 2026. Commands change often, so check <code>/help</code> or the docs for your version.</p>
+  </section>
+  </main>
+
+  <footer class="foot">
+    <span>Nexetra Learning Lab · Foundations of Claude API Integration · Bonus lesson</span>
+    <a href="https://github.com/derricksobrien" target="_blank" rel="noopener">Course hub</a>
+  </footer>
+</div>
+
+<script>
+const B = "builtin", S = "skill", W = "workflow";
+// [name, args, aliases, kind, description]
+const CATS = [
+  ["Session", [
+    ["/clear", "[name]", "/reset, /new", B, "Start a new conversation with empty context"],
+    ["/resume", "[session]", "/continue", B, "Resume a conversation by ID or name, or open the picker"],
+    ["/rename", "[name]", "", B, "Rename the session"],
+    ["/branch", "[name]", "", B, "Branch the conversation to try another direction"],
+    ["/fork", "[prompt]", "", B, "Copy the conversation into a new background session"],
+    ["/rewind", "", "/checkpoint, /undo", B, "Roll back the conversation, the code, or both"],
+    ["/btw", "[question]", "", B, "Ask a side question that isn't added to history"],
+    ["/recap", "", "", B, "One-line summary of the session"],
+    ["/copy", "[N]", "", B, "Copy the last (or Nth-latest) response"],
+    ["/export", "[filename]", "", B, "Export the conversation as plain text"],
+    ["/cd", "<path>", "", B, "Move the session to another working directory"],
+    ["/add-dir", "<path>", "", B, "Give Claude access to another directory"],
+    ["/background", "[prompt]", "/bg", B, "Detach the session to keep running as a background agent"],
+    ["/stop", "", "", B, "Stop the attached background session"],
+    ["/teleport", "", "/tp", B, "Pull a cloud session into this terminal"],
+    ["/remote-control", "", "/rc", B, "Make the session available for Remote Control"],
+    ["/desktop", "", "/app", B, "Continue the session in the desktop app"],
+    ["/mobile", "", "/ios, /android", B, "Show a QR code for the mobile app"],
+    ["/exit", "", "/quit", B, "Exit the CLI"],
+  ]],
+  ["Context and memory", [
+    ["/context", "[all]", "", B, "Show a grid of what's using the context window"],
+    ["/compact", "[instructions]", "", B, "Summarize the conversation to free context"],
+    ["/autocompact", "[auto|<tokens>]", "", B, "Set when automatic compaction kicks in"],
+    ["/memory", "", "", B, "Edit CLAUDE.md files and auto memory"],
+    ["/init", "", "", B, "Create a starter CLAUDE.md for the project"],
+    ["/insights", "", "", B, "HTML report on your recent sessions"],
+  ]],
+  ["Model and thinking", [
+    ["/model", "[model]", "", B, "Switch model (saved as your default)"],
+    ["/effort", "[low|medium|high|xhigh|max|auto]", "", B, "Set how hard Claude thinks before answering"],
+    ["/fast", "[on|off]", "", B, "Toggle fast mode"],
+    ["/advisor", "[model|off]", "", B, "Turn on a second model as an advisor"],
+    ["/plan", "[description]", "", B, "Enter plan mode: propose a plan before changing anything"],
+    ["/goal", "[condition|clear]", "", B, "Keep working across turns until a condition is met"],
+    ["/output-style", "[style]", "", B, "List or switch output styles"],
+  ]],
+  ["Review and quality", [
+    ["/code-review", "[level] [--fix] [--comment] [target]", "/review", S, "Review the diff or a PR for correctness bugs. --fix applies findings, --comment posts them on the PR"],
+    ["/simplify", "[target]", "", S, "Clean up changed code for reuse and simplicity (doesn't hunt bugs)"],
+    ["/security-review", "", "", B, "Analyze the branch's changes for security issues"],
+    ["/ultrareview", "[PR or branch]", "", B, "Deep multi-agent review in the cloud (prefer /code-review ultra)"],
+    ["/diff", "", "", B, "Review working tree changes"],
+    ["/verify", "", "", S, "Build, run, and observe the app to confirm a change works"],
+    ["/run", "", "", S, "Launch and drive the app"],
+    ["/run-skill-generator", "", "", S, "Write a project skill that teaches /run and /verify to launch your app"],
+    ["/debug", "[description]", "", S, "Turn on debug logging and troubleshoot from the log"],
+    ["/autofix-pr", "[prompt]", "", B, "Start a cloud session that fixes CI failures and review comments on the branch's PR"],
+  ]],
+  ["Agents and automation", [
+    ["/agents", "", "", B, "Create or manage subagents"],
+    ["/subtask", "<task>", "", B, "Spawn a subagent that inherits the conversation"],
+    ["/batch", "<instruction>", "", S, "Split a large change into 5–30 parallel units, each in its own worktree"],
+    ["/loop", "[interval] [prompt]", "/proactive", S, "Repeat a prompt on an interval while the session is open, e.g. /loop 5m check the deploy"],
+    ["/schedule", "[description]", "/routines", B, "Create, list, or run scheduled tasks in the cloud"],
+    ["/deep-research", "<question>", "", W, "Fan out web searches and produce a cited report"],
+    ["/workflows", "", "", B, "Show workflow progress"],
+    ["/workflow-authoring", "", "", S, "Reference for writing workflow scripts"],
+    ["/tasks", "", "/bashes", B, "Manage background work"],
+    ["/list-agents", "", "/peers", B, "List subagents and sessions Claude can message"],
+  ]],
+  ["Skills, plugins, and MCP", [
+    ["/skills", "", "", B, "List skills, with filtering and sorting"],
+    ["/reload-skills", "", "", B, "Rescan skill and command folders"],
+    ["/skill-doctor", "", "", B, "Show each skill's context cost and usage"],
+    ["/plugin", "[subcommand]", "", B, "Install, enable, disable, and list plugins"],
+    ["/reload-plugins", "[--force]", "", B, "Reload plugins without restarting"],
+    ["/plugin-authoring", "", "", S, "Reference for writing plugins and mods"],
+    ["/mcp", "[reconnect|enable|disable]", "", B, "Manage MCP servers"],
+    ["/hooks", "", "", B, "View hook configuration"],
+  ]],
+  ["Settings and setup", [
+    ["/config", "[key=value]", "/settings", B, "Open settings, or set a value directly"],
+    ["/permissions", "", "/allowed-tools", B, "Manage allow, ask, and deny rules"],
+    ["/fewer-permission-prompts", "", "", S, "Scan past sessions and add a read-only allowlist"],
+    ["/update-config", "[request]", "", S, "Change settings.json by describing what you want"],
+    ["/auto-mode-setup", "", "", B, "Draft and save auto mode environment settings"],
+    ["/sandbox", "", "", B, "Toggle sandbox mode"],
+    ["/doctor", "[prompt-audit]", "/checkup", S, "Check your setup and fix problems after you confirm"],
+    ["/import", "[codex|gemini|cursor]", "", B, "Import configuration from other AI coding tools"],
+    ["/keybindings", "", "", B, "Open the keybindings file"],
+    ["/terminal-setup", "", "", B, "Install the Shift+Enter newline keybinding"],
+    ["/statusline", "", "", B, "Configure the status line"],
+    ["/theme", "", "", B, "Change the color theme"],
+    ["/color", "[color]", "", B, "Set the prompt bar color"],
+    ["/tui", "[default|fullscreen]", "", B, "Choose the terminal renderer"],
+    ["/focus", "", "", B, "Toggle focus view (fullscreen only)"],
+    ["/scroll-speed", "", "", B, "Set mouse wheel speed (fullscreen only)"],
+    ["/voice", "[hold|tap|off]", "", B, "Voice dictation"],
+    ["/privacy-settings", "", "", B, "Privacy settings"],
+  ]],
+  ["Integrations", [
+    ["/ide", "", "", B, "Manage IDE integrations"],
+    ["/chrome", "", "", B, "Configure Claude in Chrome"],
+    ["/claude-in-chrome", "[task]", "", S, "Run a browser task through Claude in Chrome"],
+    ["/install-github-app", "", "", B, "Install the Claude GitHub App"],
+    ["/install-slack-app", "", "", B, "Install the Slack app"],
+    ["/web-setup", "", "", B, "Connect GitHub for cloud sessions"],
+    ["/remote-env", "", "", B, "Choose the default cloud environment"],
+    ["/setup-bedrock", "", "", B, "Amazon Bedrock sign-in and models (shown only when Bedrock is enabled)"],
+    ["/setup-vertex", "", "", B, "Google Vertex sign-in and models (shown only when Vertex is enabled)"],
+    ["/claude-api", "[topic]", "", S, "Claude API reference and workflows: migrations, cost, evals"],
+  ]],
+  ["Artifacts and design", [
+    ["/artifacts", "", "", B, "List, open, or copy links to your artifacts"],
+    ["/artifact-capabilities", "", "", S, "Reference for what a published page can do at runtime"],
+    ["/artifact-diagramming", "", "", S, "Guidance for diagrams in artifacts"],
+    ["/dataviz", "[request]", "", S, "Chart and dashboard design guidance"],
+    ["/slides", "[brief]", "", S, "Create a slide deck artifact"],
+    ["/design", "[brief]", "", S, "Draft UI mockups as a Claude Design artifact"],
+    ["/design-sync", "[hint]", "", S, "Upload a React design system to Claude Design"],
+    ["/design-login", "", "", B, "Authorize design-system access for /design-sync"],
+  ]],
+  ["Account and help", [
+    ["/help", "", "", B, "Show help and commands"],
+    ["/powerup", "", "", B, "Interactive lessons on Claude Code features"],
+    ["/usage", "", "/cost, /stats", B, "Session cost, plan limits, and activity"],
+    ["/usage-credits", "", "", B, "Configure or request usage credits"],
+    ["/rate-limit-options", "", "", B, "Options when a usage limit blocks a request"],
+    ["/status", "", "", B, "Open the status tab in settings"],
+    ["/release-notes", "", "", B, "Browse the changelog"],
+    ["/restart", "", "/update", B, "Restart to apply an installed update"],
+    ["/upgrade", "", "", B, "Open the plan upgrade page"],
+    ["/login", "", "", B, "Sign in"],
+    ["/logout", "", "", B, "Sign out"],
+    ["/bug", "[report]", "/share", B, "Report a bug or share the conversation"],
+    ["/feedback", "[report]", "", B, "Send product feedback"],
+    ["/team-onboarding", "", "", B, "Onboarding guide built from 30 days of your usage"],
+    ["/passes", "", "", B, "Share a free week of Claude Code, if eligible"],
+    ["/stickers", "", "", B, "Check sticker availability"],
+    ["/radio", "", "", B, "Open Claude FM radio"],
+    ["/heapdump", "", "", B, "Write memory diagnostics (hidden; type it in full)"],
+  ]],
+];
+const LABEL = { builtin: "Built-in", skill: "Skill", workflow: "Workflow" };
+const ref = document.getElementById("ref");
+const q = document.getElementById("q");
+const countEl = document.getElementById("count");
+const chips = document.getElementById("chips");
+let kind = "all";
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const total = CATS.reduce((n, c) => n + c[1].length, 0);
+
+function render() {
+  const term = q.value.trim().toLowerCase().replace(/^\//, "");
+  let shown = 0, html = "";
+  for (const [cat, rows] of CATS) {
+    const hits = rows.filter(([n, a, al, k, d]) =>
+      (kind === "all" || k === kind) &&
+      (!term || (n + " " + al + " " + d + " " + cat).toLowerCase().includes(term)));
+    if (!hits.length) continue;
+    shown += hits.length;
+    html += `<div class="ref-cat"><h3>${cat}<span>${hits.length}</span></h3>` +
+      hits.map(([n, a, al, k, d]) => `<div class="row">
+        <div class="cmd"><b>${esc(n)}</b>${a ? ` <span class="args">${esc(a)}</span>` : ""}</div>
+        <div class="desc">${esc(d)}${al ? `<span class="alias">Also: ${esc(al)}</span>` : ""}</div>
+        <span class="tag ${k}">${LABEL[k]}</span></div>`).join("") + `</div>`;
+  }
+  ref.innerHTML = html || `<p class="empty">No command matches “${esc(q.value)}”. Try a word for what you want to do, like “undo” or “review”.</p>`;
+  countEl.textContent = shown === total ? `${total} commands` : `${shown} of ${total}`;
+}
+q.addEventListener("input", render);
+chips.addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  kind = b.dataset.kind;
+  chips.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(c === b)));
+  render();
+});
+render();
+</script>
+
+</body>
+</html>
